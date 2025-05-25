@@ -1,5 +1,2 @@
 node_modules
 *.env
-
-# PORT=5000
-# DB_URL=mongodb+srv://siamsheikh97:WpOnyaDTWgjCbrFY@cluster0.tcfwhcs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
