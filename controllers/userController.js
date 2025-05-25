@@ -1,10 +1,19 @@
+const path = require("path");
 const multer = require("multer");
 
 const User = require("../models/User");
-const catchAsync = require('../utils/catchAsync');
+const catchAsync = require("../utils/catchAsync");
 const { deleteImage } = require("../utils/deleteImage");
 
-const multerStorage = multer.memoryStorage();
+const multerStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "..", "public", "user_profile_pictures"));
+  },
+  filename: function (req, file, cb) {
+    file.filename = `user-${req.user.id}-${Date.now()}.jpg`;
+    cb(null, file.filename);
+  },
+});
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
@@ -42,7 +51,7 @@ exports.getUser = catchAsync(async (req, res, next) => {
 
 // Do NOT update passwords with this!
 exports.updateUser = catchAsync(async (req, res, next) => {
-  if (req.body.password || req.body.passwordConfirm) {
+  if (req.body.password) {
     return next(
       new AppError(
         "This route is not for password updates. Please use /updateMyPassword.",
@@ -54,8 +63,9 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   // 2) Filtered out unwanted fields names that are not allowed to be updated
   const filteredBody = filterObj(req.body, "name", "email");
   if (req.file) {
-    deleteImage(req.user.photo, "users");
-    filteredBody.photo = req.body.photo;
+    if (req.user.photo != "default_user.jpg")
+      deleteImage(req.user.photo, "user_profile_pictures");
+    filteredBody.photo = req.file.filename;
   }
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
