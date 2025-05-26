@@ -10,8 +10,9 @@ const multerStorage = multer.diskStorage({
     cb(null, path.join(__dirname, "..", "public", "user_profile_pictures"));
   },
   filename: function (req, file, cb) {
-    file.filename = `user-${req.user.id}-${Date.now()}.jpg`;
-    cb(null, file.filename);
+    const ext = path.extname(file.originalname).toLowerCase();
+    // file.filename = `user-${req.user.id}-${Date.now()}.jpg`;
+    cb(null, `${file.originalname}`);
   },
 });
 
@@ -63,9 +64,10 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   // 2) Filtered out unwanted fields names that are not allowed to be updated
   const filteredBody = filterObj(req.body, "name", "email");
   if (req.file) {
-    if (req.user.photo != "default_user.jpg")
+    if (req.user.photo != "default_user.jpg" && req.user.photo != req.file.originalname){
       deleteImage(req.user.photo, "user_profile_pictures");
-    filteredBody.photo = req.file.filename;
+    }
+    filteredBody.photo = req.file.originalname;
   }
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {

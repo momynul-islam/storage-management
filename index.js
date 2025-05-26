@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -9,7 +10,6 @@ require("dotenv").config({});
 const authRouter = require("./routes/authRoutes");
 const userRouter = require("./routes/userRoutes");
 const fileRouter = require("./routes/fileRoutes");
-const folderRouter = require("./routes/folderRoutes");
 const errorController = require("./controllers/errorController");
 
 const app = express();
@@ -27,7 +27,6 @@ app.use(express.static(path.join(__dirname, "Public")));
 // Routes
 app.use("/auths/", authRouter);
 app.use("/users/", userRouter);
-app.use("/folders/", folderRouter);
 app.use("/files/", fileRouter);
 
 app.all("/{*any}", (req, res, next) => {
